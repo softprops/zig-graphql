@@ -1,5 +1,5 @@
 <h1 align="center">
-    zig gql
+    zig graphql
 </h1>
 
 <div align="center">
