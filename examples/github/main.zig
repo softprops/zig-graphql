@@ -4,7 +4,7 @@ const std = @import("std");
 const gql = @import("gql");
 
 pub const std_options = struct {
-    //pub const log_level = .info; // the default is .debug
+    pub const log_level = .info; // the default is .debug
 };
 
 pub fn main() !void {
