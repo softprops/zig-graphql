@@ -20,12 +20,19 @@ pub const Endpoint = union(enum) {
 pub const Request = struct {
     query: []const u8,
     operationName: ?[]const u8 = null,
-    // variables: ?(???)
 };
 
+pub const Location = struct {
+    line: usize,
+    column: usize,
+};
+
+/// Represents a standard GraphQL response error
+/// see the [GraphQL docs](https://spec.graphql.org/October2021/#sec-Errors.Error-result-format)
 pub const Error = struct {
     message: []const u8,
-    code: []const u8,
+    path: ?[][]const u8 = null,
+    locations: ?[]Location = null,
 };
 
 /// Represents a standard GraphQL response which may contain data or errors. Use the `result` method to dereference this for the common usecase
@@ -34,11 +41,11 @@ pub const Error = struct {
 /// see also these [GraphQL docs](https://graphql.org/learn/serving-over-http/#response)
 fn Response(comptime T: type) type {
     return struct {
-        errors: ?[]const Error = null,
+        errors: ?[]Error = null,
         data: ?T = null,
 
         /// a union of data or errors
-        const Result = union(enum) { data: T, errors: []const Error };
+        const Result = union(enum) { data: T, errors: []Error };
 
         /// simplifies the ease of processing the presence and/or absence of data or errors
         /// in a unified type. this method assumes the response contains one or the other.
@@ -80,7 +87,10 @@ pub const Client = struct {
 
     /// Initializes a new GQL Client. Be sure to call `deinit` when finished
     /// using this instance
-    pub fn init(allocator: std.mem.Allocator, options: Options) std.Uri.ParseError!Self {
+    pub fn init(
+        allocator: std.mem.Allocator,
+        options: Options,
+    ) std.Uri.ParseError!Self {
         // validate that Uri is validate as early as possible
         _ = try options.endpoint.toUri();
         return .{
@@ -137,7 +147,7 @@ pub const Client = struct {
                 std.log.debug("response {any}", .{req.response.status});
                 const body = req.reader().readAllAlloc(
                     self.allocator,
-                    8192 * 2 * 2,
+                    8192 * 2 * 2, // note: optimistic arb choice of buffer size
                 ) catch unreachable;
                 defer self.allocator.free(body);
                 return parseResponse(self.allocator, body, T) catch return error.Json;
@@ -151,16 +161,16 @@ fn parseResponse(
     body: []const u8,
     comptime T: type,
 ) !std.json.Parsed(Response(T)) {
-    const parsed = try std.json.parseFromSlice(
+    std.log.debug("parsing body {s}\n", .{body});
+    return try std.json.parseFromSlice(
         Response(T),
         allocator,
         body,
         .{
             .ignore_unknown_fields = true,
+            .allocate = .alloc_always, // nested structures are known to segfault with the default
         },
     );
-    std.debug.print("parsed {any}\n", .{parsed.value});
-    return parsed;
 }
 
 test "parse response" {
@@ -168,9 +178,17 @@ test "parse response" {
     const T = struct {
         foo: []const u8,
     };
-    // for runtime inline slice below
-    var idx: usize = 0;
-
+    var path = [_][]const u8{
+        "foo",
+        "bar",
+    };
+    var err = Error{
+        .message = "err",
+        .path = &path,
+    };
+    var errors = [_]Error{
+        err,
+    };
     const tests = [_]struct {
         body: []const u8,
         result: anyerror!Response(T),
@@ -194,17 +212,12 @@ test "parse response" {
             \\{
             \\  "errors": [{
             \\    "message": "err",
-            \\    "code": "e"
+            \\    "path": ["foo","bar"]
             \\  }]
             \\}
             ,
             .result = .{
-                .errors = ([_]Error{
-                    Error{
-                        .message = "err",
-                        .code = "e",
-                    },
-                })[idx..],
+                .errors = &errors,
             },
         },
     };
