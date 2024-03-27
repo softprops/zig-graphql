@@ -3,7 +3,7 @@
 </h1>
 
 <div align="center">
-    A very basis GraphQL HTTP client for zig
+    A very basic GraphQL HTTP client for zig
 </div>
 
 ---
