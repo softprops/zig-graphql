@@ -72,6 +72,7 @@ pub const Options = struct {
 /// Possible request errors
 const RequestError = error{
     NotAuthorized,
+    Forbidden,
     ServerError,
     Http,
     Json,
@@ -100,7 +101,7 @@ pub const Client = struct {
         };
     }
 
-    /// Call this method to dealocate resources
+    /// Call this method to deallocate resources
     pub fn deinit(self: *Self) void {
         self.httpClient.deinit();
     }
@@ -133,11 +134,11 @@ pub const Client = struct {
         ) catch return error.Json;
         req.finish() catch return error.Http;
         req.wait() catch return error.Http;
-
         switch (req.response.status.class()) {
             // client errors
             .client_error => switch (req.response.status) {
                 .unauthorized => return error.NotAuthorized,
+                .forbidden => return error.Forbidden,
                 else => return error.Http,
             },
             // handle server errors

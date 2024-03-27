@@ -1,8 +1,10 @@
+///! Runs a request against the GitHub GQL API
+///! see [the GitHub GQL Explorer](https://docs.github.com/en/graphql/overview/explorer) to learn more about the GitHub schema
 const std = @import("std");
 const gql = @import("gql");
 
 pub const std_options = struct {
-    pub const log_level = .info; // the default is .debug
+    //pub const log_level = .info; // the default is .debug
 };
 
 pub fn main() !void {
@@ -18,7 +20,7 @@ pub fn main() !void {
             .{pat},
         );
     } else {
-        std.log.err("An GH_TOKEN env var containing a GitHub API token is required", .{});
+        std.log.info("Required GH_TOKEN env var containing a GitHub API token", .{});
         return;
     };
 
