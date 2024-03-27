@@ -16,14 +16,14 @@ pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
 
     // create a module to be used internally.
-    const gql = b.createModule(.{
+    const graphql = b.createModule(.{
         // fixme(0.12): .source_file -> root_source_file
         .source_file = .{ .path = "src/main.zig" },
     });
 
     // register the module so it can be referenced
     // using the package manager.
-    try b.modules.put(b.dupe("gql"), gql);
+    try b.modules.put(b.dupe("graphql"), graphql);
 
     // Creates a step for unit testing. This only builds the test executable
     // but does not run it.
@@ -75,7 +75,7 @@ pub fn build(b: *std.Build) !void {
             .optimize = optimize,
         });
         // fixme(0.12): addModule -> root_module.addImport(name, mod)
-        exe.addModule("gql", gql);
+        exe.addModule("graphql", graphql);
 
         // run the artifact - depending on the example exe
         const example_run = b.addRunArtifact(exe);

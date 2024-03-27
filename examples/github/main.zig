@@ -1,7 +1,7 @@
 ///! Runs a request against the GitHub GQL API
 ///! see [the GitHub GQL Explorer](https://docs.github.com/en/graphql/overview/explorer) to learn more about the GitHub schema
 const std = @import("std");
-const gql = @import("gql");
+const gql = @import("graphql");
 
 pub const std_options = struct {
     pub const log_level = .info; // the default is .debug
@@ -38,7 +38,7 @@ pub fn main() !void {
             .query =
             \\query test {
             \\  search(first: 100, type: REPOSITORY, query: "topic:zig") {
-            \\      repositoryCounts
+            \\      repositoryCount
             \\  }
             \\}
             ,
