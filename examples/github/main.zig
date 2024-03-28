@@ -20,7 +20,7 @@ pub fn main() !void {
             .{pat},
         );
     } else {
-        std.log.info("Required GH_TOKEN env var containing a GitHub API token", .{});
+        std.log.info("Required GH_TOKEN env var containing a GitHub API token - https://github.com/settings/tokens", .{});
         return;
     };
 
