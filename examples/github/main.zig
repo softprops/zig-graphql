@@ -43,6 +43,8 @@ pub fn main() !void {
             \\}
             ,
         },
+        // 👇 struct representing returned data, this maybe be an adhoc or named struct
+        //    you want this to line up with the shape of your query
         struct {
             search: struct {
                 repositoryCount: usize,
@@ -54,7 +56,10 @@ pub fn main() !void {
     if (result) |resp| {
         defer resp.deinit();
         switch (resp.value.result()) {
-            .data => |data| std.debug.print("zig repo count {any}\n", .{data.search.repositoryCount}),
+            .data => |data| std.debug.print(
+                "zig repo count {any}\n",
+                .{data.search.repositoryCount},
+            ),
             .errors => |errors| {
                 for (errors) |err| {
                     std.debug.print("Error: {s}", .{err.message});
@@ -68,7 +73,7 @@ pub fn main() !void {
         }
     } else |err| {
         std.log.err(
-            "Request failed with error {any}",
+            "Request failed with {any}",
             .{err},
         );
     }

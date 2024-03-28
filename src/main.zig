@@ -71,11 +71,19 @@ pub const Options = struct {
 
 /// Possible request errors
 const RequestError = error{
+    /// the request was not authorized by server
     NotAuthorized,
+    /// the request was forbidden by server
     Forbidden,
+    /// the server returned an unxpected result
     ServerError,
+    /// there was an http network or client error
     Http,
-    Json,
+    /// there was a problem serializing the request
+    Serialization,
+    /// there was a problem deserizalize the response
+    Deserialization,
+    /// the server throttled the request
     Throttled,
 };
 
@@ -154,7 +162,7 @@ pub const Client = struct {
         defer req.deinit();
         req.transfer_encoding = .chunked;
         req.start() catch return error.Http;
-        serializeRequest(request, req.writer()) catch return error.Json;
+        serializeRequest(request, req.writer()) catch return error.Serialization;
         req.finish() catch return error.Http;
         req.wait() catch return error.Http;
         switch (req.response.status.class()) {
@@ -174,7 +182,7 @@ pub const Client = struct {
                     8192 * 2 * 2, // note: optimistic arb choice of buffer size
                 ) catch unreachable;
                 defer self.allocator.free(body);
-                const parsed = parseResponse(self.allocator, body, T) catch return error.Json;
+                const parsed = parseResponse(self.allocator, body, T) catch return error.Deserialization;
                 return Owned(Response(T)).fromJson(parsed);
             },
         }
