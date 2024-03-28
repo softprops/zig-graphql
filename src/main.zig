@@ -146,6 +146,7 @@ pub const Client = struct {
         }
         var req = self.httpClient.request(
             .POST,
+            // endpoint is validated on client init
             self.options.endpoint.toUri() catch unreachable,
             headers,
             .{},
@@ -192,7 +193,7 @@ fn parseResponse(
     allocator: std.mem.Allocator,
     body: []const u8,
     comptime T: type,
-) !std.json.Parsed(Response(T)) {
+) std.json.ParseError(std.json.Scanner)!std.json.Parsed(Response(T)) {
     std.log.debug("parsing body {s}\n", .{body});
     return try std.json.parseFromSlice(
         Response(T),
