@@ -1,6 +1,5 @@
 /// A very basic general purpose GraphQL HTTP client
 const std = @import("std");
-const testing = std.testing;
 
 pub const Endpoint = union(enum) {
     url: []const u8,
@@ -28,7 +27,8 @@ pub const Location = struct {
 };
 
 /// Represents a standard GraphQL response error
-/// see the [GraphQL docs](https://spec.graphql.org/October2021/#sec-Errors.Error-result-format)
+///
+/// See the [GraphQL docs](https://spec.graphql.org/October2021/#sec-Errors.Error-result-format) for more information
 pub const Error = struct {
     message: []const u8,
     path: ?[][]const u8 = null,
@@ -38,7 +38,7 @@ pub const Error = struct {
 /// Represents a standard GraphQL response which may contain data or errors. Use the `result` method to dereference this for the common usecase
 /// of one or the other but not both
 ///
-/// see also these [GraphQL docs](https://graphql.org/learn/serving-over-http/#response)
+/// See the [GraphQL docs](https://graphql.org/learn/serving-over-http/#response) for more information
 fn Response(comptime T: type) type {
     return struct {
         errors: ?[]Error = null,
@@ -48,7 +48,7 @@ fn Response(comptime T: type) type {
         const Result = union(enum) { data: T, errors: []Error };
 
         /// simplifies the ease of processing the presence and/or absence of data or errors
-        /// in a unified type. this method assumes the response contains one or the other.
+        /// in a unified type. This method assumes the response contains one or the other.
         pub fn result(self: @This()) Result {
             if (self.data) |data| {
                 return .{ .data = data };
@@ -79,7 +79,7 @@ const RequestError = error{
     Throttled,
 };
 
-///
+/// A type that expresses the caller's ownership responsiblity to deinitailize the data.
 pub fn Owned(comptime T: type) type {
     return struct {
         value: T,
@@ -103,7 +103,7 @@ pub fn Owned(comptime T: type) type {
     };
 }
 
-/// A simpel GraphQL HTTP client
+/// A simple GraphQL HTTP client
 pub const Client = struct {
     httpClient: std.http.Client,
     allocator: std.mem.Allocator,
@@ -131,6 +131,8 @@ pub const Client = struct {
     }
 
     /// Sends a GraphQL Request to a server
+    ///
+    /// Callers are expected to call `deinit()` on the Owned type returned to free memory.
     pub fn send(
         self: *Self,
         request: Request,
@@ -151,11 +153,7 @@ pub const Client = struct {
         defer req.deinit();
         req.transfer_encoding = .chunked;
         req.start() catch return error.Http;
-        std.json.stringify(
-            request,
-            .{ .emit_null_optional_fields = false },
-            req.writer(),
-        ) catch return error.Json;
+        serializeRequest(request, req.writer()) catch return error.Json;
         req.finish() catch return error.Http;
         req.wait() catch return error.Http;
         switch (req.response.status.class()) {
@@ -182,6 +180,14 @@ pub const Client = struct {
     }
 };
 
+fn serializeRequest(request: Request, writer: anytype) @TypeOf(writer).Error!void {
+    try std.json.stringify(
+        request,
+        .{ .emit_null_optional_fields = false },
+        writer,
+    );
+}
+
 fn parseResponse(
     allocator: std.mem.Allocator,
     body: []const u8,
@@ -197,6 +203,46 @@ fn parseResponse(
             .allocate = .alloc_always, // nested structures are known to segfault with the default
         },
     );
+}
+
+test "serialize request" {
+    var buf: [1024]u8 = undefined;
+    var fbs = std.io.fixedBufferStream(&buf);
+    const tests = [_]struct {
+        request: Request,
+        expect: []const u8,
+    }{
+        .{
+            .request = .{
+                .query =
+                \\ {
+                \\   foo
+                \\ }
+                ,
+            },
+            .expect =
+            \\{"query":" {\n   foo\n }"}
+            ,
+        },
+        .{
+            .request = .{
+                .query =
+                \\ {
+                \\   foo
+                \\ }
+                ,
+                .operationName = "foo",
+            },
+            .expect =
+            \\{"query":" {\n   foo\n }","operationName":"foo"}
+            ,
+        },
+    };
+    for (tests) |t| {
+        defer fbs.reset();
+        try serializeRequest(t.request, fbs.writer());
+        try std.testing.expectEqualStrings(t.expect, fbs.getWritten());
+    }
 }
 
 test "parse response" {
@@ -252,5 +298,31 @@ test "parse response" {
         const result = try parseResponse(allocator, t.body, T);
         defer result.deinit();
         try std.testing.expectEqualDeep(t.result, result.value);
+    }
+}
+
+test "response" {
+    var err = Error{
+        .message = "err",
+    };
+    var errors = [_]Error{
+        err,
+    };
+    const tests = [_]struct {
+        response: Response(u32),
+        result: Response(u32).Result,
+    }{
+        .{
+            .response = .{ .data = 42 },
+            .result = .{ .data = 42 },
+        },
+        .{
+            .response = .{ .errors = &errors },
+            .result = .{ .errors = &errors },
+        },
+    };
+
+    for (tests) |t| {
+        try std.testing.expectEqualDeep(t.result, t.response.result());
     }
 }
