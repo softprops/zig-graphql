@@ -12,7 +12,7 @@ pub fn main() !void {
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
 
-    var authz = if (std.os.getenv("GH_TOKEN")) |pat| blk: {
+    const authz = if (std.os.getenv("GH_TOKEN")) |pat| blk: {
         var buf: [400]u8 = undefined;
         break :blk try std.fmt.bufPrint(
             &buf,
@@ -33,7 +33,7 @@ pub fn main() !void {
     );
     defer github.deinit();
 
-    var result = github.send(
+    const result = github.send(
         .{
             .query =
             \\query test {
