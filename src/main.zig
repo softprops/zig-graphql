@@ -79,6 +79,30 @@ const RequestError = error{
     Throttled,
 };
 
+///
+pub fn Owned(comptime T: type) type {
+    return struct {
+        value: T,
+        arena: *std.heap.ArenaAllocator,
+
+        const Self = @This();
+
+        fn fromJson(parsed: std.json.Parsed(T)) Self {
+            return .{
+                .arena = parsed.arena,
+                .value = parsed.value,
+            };
+        }
+
+        pub fn deinit(self: Self) void {
+            const arena = self.arena;
+            const allocator = arena.child_allocator;
+            arena.deinit();
+            allocator.destroy(arena);
+        }
+    };
+}
+
 /// A simpel GraphQL HTTP client
 pub const Client = struct {
     httpClient: std.http.Client,
@@ -111,7 +135,7 @@ pub const Client = struct {
         self: *Self,
         request: Request,
         comptime T: type,
-    ) RequestError!std.json.Parsed(Response(T)) {
+    ) RequestError!Owned(Response(T)) {
         var headers = std.http.Headers.init(self.allocator);
         defer headers.deinit();
         headers.append("Content-Type", "application/json") catch return error.Http;
@@ -151,7 +175,8 @@ pub const Client = struct {
                     8192 * 2 * 2, // note: optimistic arb choice of buffer size
                 ) catch unreachable;
                 defer self.allocator.free(body);
-                return parseResponse(self.allocator, body, T) catch return error.Json;
+                const parsed = parseResponse(self.allocator, body, T) catch return error.Json;
+                return Owned(Response(T)).fromJson(parsed);
             },
         }
     }
