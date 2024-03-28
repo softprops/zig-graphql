@@ -27,7 +27,7 @@ jobs:
       - uses: goto-bus-stop/setup-zig@v2
         with:
           version: 0.11.0
-      - name: fmt
+      - name: run
         run: zig build run-github-example
   test:
     runs-on: ubuntu-latest
