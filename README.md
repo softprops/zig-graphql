@@ -139,7 +139,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 +    // 👇 add the graphql module to executable
-+    exe.root_module.addMImport("graphql", graphql);
++    exe.root_module.addImport("graphql", graphql);
 
     b.installArtifact(exe);
 }
