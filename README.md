@@ -8,7 +8,7 @@
 
 ---
 
-[![ci](https://github.com/softprops/zig-graphql/actions/workflows/ci.yml/badge.svg)](https://github.com/softprops/zig-graphql/actions/workflows/ci.yml) ![License Info](https://img.shields.io/github/license/softprops/zig-graphql) ![Releases](https://img.shields.io/github/v/release/softprops/zig-graphql) [![Zig Support](https://img.shields.io/badge/zig-0.11.0-black?logo=zig)](https://ziglang.org/documentation/0.11.0/)
+[![ci](https://github.com/softprops/zig-graphql/actions/workflows/ci.yml/badge.svg)](https://github.com/softprops/zig-graphql/actions/workflows/ci.yml) ![License Info](https://img.shields.io/github/license/softprops/zig-graphql) ![Releases](https://img.shields.io/github/v/release/softprops/zig-graphql) [![Zig Support](https://img.shields.io/badge/zig-0.12.0-black?logo=zig)](https://ziglang.org/documentation/0.12.0/)
 
 ## examples
 
@@ -107,11 +107,12 @@ Create a `build.zig.zon` file to declare a dependency
         // 👇 declare dep properties
         .graphql = .{
             // 👇 uri to download
-            .url = "https://github.com/softprops/zig-graphql/archive/refs/tags/v0.1.0.tar.gz",
+            .url = "https://github.com/softprops/zig-graphql/archive/refs/tags/v0.2.0.tar.gz",
             // 👇 hash verification
             .hash = "{current-hash-here}",
         },
     },
+    .paths = .{""},
 }
 ```
 
@@ -119,26 +120,26 @@ Create a `build.zig.zon` file to declare a dependency
 
 Add the following in your `build.zig` file
 
-```zig
+```diff
 const std = @import("std");
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
 
     const optimize = b.standardOptimizeOption(.{});
-    // 👇 de-reference graphql dep from build.zig.zon
-    const graphql = b.dependency("graphql", .{
-        .target = target,
-        .optimize = optimize,
-    });
++    // 👇 de-reference graphql dep from build.zig.zon
++    const graphql = b.dependency("graphql", .{
++        .target = target,
++        .optimize = optimize,
++    }).module("graphql");
     var exe = b.addExecutable(.{
         .name = "your-exe",
-        .root_source_file = .{ .path = "src/main.zig" },
+        .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
-    // 👇 add the graphql module to executable
-    exe.addModule("graphql", graphql.module("graphql"));
++    // 👇 add the graphql module to executable
++    exe.root_module.addImport("graphql", graphql);
 
     b.installArtifact(exe);
 }

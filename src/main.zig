@@ -118,7 +118,7 @@ pub const Client = struct {
     options: Options,
     const Self = @This();
 
-    /// Initializes a new GQL Client. Be sure to call `deinit` when finished
+    /// Initializes a new GraphQL Client. Be sure to call `deinit` when finished
     /// using this instance
     pub fn init(
         allocator: std.mem.Allocator,
@@ -146,22 +146,27 @@ pub const Client = struct {
         request: Request,
         comptime T: type,
     ) RequestError!Owned(Response(T)) {
-        var headers = std.http.Headers.init(self.allocator);
-        defer headers.deinit();
-        headers.append("Content-Type", "application/json") catch return error.Http;
-        if (self.options.authorization) |authz| {
-            headers.append("Authorization", authz) catch return error.Http;
-        }
-        var req = self.httpClient.request(
+        const headers = std.http.Client.Request.Headers{
+            .content_type = .{ .override = "application/json" },
+            .authorization = if (self.options.authorization) |authz| .{
+                .override = authz,
+            } else .default,
+        };
+
+        // same as std client.fetch(...) default server_header_buffer
+        var server_header_buffer: [16 * 1024]u8 = undefined;
+        var req = self.httpClient.open(
             .POST,
             // endpoint is validated on client init
             self.options.endpoint.toUri() catch unreachable,
-            headers,
-            .{},
+            .{
+                .headers = headers,
+                .server_header_buffer = &server_header_buffer,
+            },
         ) catch return error.Http;
         defer req.deinit();
         req.transfer_encoding = .chunked;
-        req.start() catch return error.Http;
+        req.send() catch return error.Http;
         serializeRequest(request, req.writer()) catch return error.Serialization;
         req.finish() catch return error.Http;
         req.wait() catch return error.Http;
@@ -255,7 +260,7 @@ test "serialize request" {
 }
 
 test "parse response" {
-    var allocator = std.testing.allocator;
+    const allocator = std.testing.allocator;
     const T = struct {
         foo: []const u8,
     };
@@ -263,7 +268,7 @@ test "parse response" {
         "foo",
         "bar",
     };
-    var err = Error{
+    const err = Error{
         .message = "err",
         .path = &path,
     };
@@ -311,7 +316,7 @@ test "parse response" {
 }
 
 test "response" {
-    var err = Error{
+    const err = Error{
         .message = "err",
     };
     var errors = [_]Error{
