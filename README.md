@@ -8,7 +8,7 @@
 
 ---
 
-[![ci](https://github.com/softprops/zig-graphql/actions/workflows/ci.yml/badge.svg)](https://github.com/softprops/zig-graphql/actions/workflows/ci.yml) ![License Info](https://img.shields.io/github/license/softprops/zig-graphql) ![Releases](https://img.shields.io/github/v/release/softprops/zig-graphql) [![Zig Support](https://img.shields.io/badge/zig-0.11.0-black?logo=zig)](https://ziglang.org/documentation/0.11.0/)
+[![ci](https://github.com/softprops/zig-graphql/actions/workflows/ci.yml/badge.svg)](https://github.com/softprops/zig-graphql/actions/workflows/ci.yml) ![License Info](https://img.shields.io/github/license/softprops/zig-graphql) ![Releases](https://img.shields.io/github/v/release/softprops/zig-graphql) [![Zig Support](https://img.shields.io/badge/zig-0.12.0-black?logo=zig)](https://ziglang.org/documentation/0.12.0/)
 
 ## examples
 
@@ -107,11 +107,12 @@ Create a `build.zig.zon` file to declare a dependency
         // 👇 declare dep properties
         .graphql = .{
             // 👇 uri to download
-            .url = "https://github.com/softprops/zig-graphql/archive/refs/tags/v0.1.0.tar.gz",
+            .url = "https://github.com/softprops/zig-graphql/archive/refs/tags/v0.2.0.tar.gz",
             // 👇 hash verification
             .hash = "{current-hash-here}",
         },
     },
+    .paths = .{""},
 }
 ```
 
