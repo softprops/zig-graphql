@@ -3,8 +3,8 @@
 const std = @import("std");
 const gql = @import("graphql");
 
-pub const std_options = struct {
-    pub const log_level = .info; // the default is .debug
+pub const std_options: std.Options = .{
+    .log_level = .info, // the default is .debug
 };
 
 pub fn main() !void {
@@ -12,7 +12,7 @@ pub fn main() !void {
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
 
-    const authz = if (std.os.getenv("GH_TOKEN")) |pat| blk: {
+    const authz = if (std.posix.getenv("GH_TOKEN")) |pat| blk: {
         var buf: [400]u8 = undefined;
         break :blk try std.fmt.bufPrint(
             &buf,

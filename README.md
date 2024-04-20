@@ -119,26 +119,26 @@ Create a `build.zig.zon` file to declare a dependency
 
 Add the following in your `build.zig` file
 
-```zig
+```diff
 const std = @import("std");
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
 
     const optimize = b.standardOptimizeOption(.{});
-    // 👇 de-reference graphql dep from build.zig.zon
-    const graphql = b.dependency("graphql", .{
-        .target = target,
-        .optimize = optimize,
-    });
++    // 👇 de-reference graphql dep from build.zig.zon
++    const graphql = b.dependency("graphql", .{
++        .target = target,
++        .optimize = optimize,
++    }).module("graphql");
     var exe = b.addExecutable(.{
         .name = "your-exe",
-        .root_source_file = .{ .path = "src/main.zig" },
+        .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
-    // 👇 add the graphql module to executable
-    exe.addModule("graphql", graphql.module("graphql"));
++    // 👇 add the graphql module to executable
++    exe.root_module.addMImport("graphql", graphql);
 
     b.installArtifact(exe);
 }
