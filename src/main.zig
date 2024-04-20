@@ -118,7 +118,7 @@ pub const Client = struct {
     options: Options,
     const Self = @This();
 
-    /// Initializes a new GQL Client. Be sure to call `deinit` when finished
+    /// Initializes a new GraphQL Client. Be sure to call `deinit` when finished
     /// using this instance
     pub fn init(
         allocator: std.mem.Allocator,
