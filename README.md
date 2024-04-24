@@ -99,6 +99,14 @@ Create a `build.zig.zon` file to declare a dependency
 
 > .zon short for "zig object notation" files are essentially zig structs. `build.zig.zon` is zigs native package manager convention for where to declare dependencies
 
+Starting in zig `0.12.0`, you can use
+
+```sh
+zig fetch --save https://github.com/softprops/zig-graphql/archive/refs/tags/v0.2.1.tar.gz
+```
+
+to manually add it as follows
+
 ```zig
 .{
     .name = "my-app",
@@ -107,7 +115,7 @@ Create a `build.zig.zon` file to declare a dependency
         // 👇 declare dep properties
         .graphql = .{
             // 👇 uri to download
-            .url = "https://github.com/softprops/zig-graphql/archive/refs/tags/v0.2.0.tar.gz",
+            .url = "https://github.com/softprops/zig-graphql/archive/refs/tags/v0.2.1.tar.gz",
             // 👇 hash verification
             .hash = "{current-hash-here}",
         },
