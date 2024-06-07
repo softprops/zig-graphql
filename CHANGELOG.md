@@ -1,3 +1,7 @@
+# 0.2.2
+
+Upgrade to zig 0.13.0, current stable. No breaking changes.
+
 # 0.2.1
 
 Fix build.zig.zon package name, previously "gql" and now "graphql".

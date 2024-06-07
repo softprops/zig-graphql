@@ -8,7 +8,7 @@
 
 ---
 
-[![ci](https://github.com/softprops/zig-graphql/actions/workflows/ci.yml/badge.svg)](https://github.com/softprops/zig-graphql/actions/workflows/ci.yml) ![License Info](https://img.shields.io/github/license/softprops/zig-graphql) ![Releases](https://img.shields.io/github/v/release/softprops/zig-graphql) [![Zig Support](https://img.shields.io/badge/zig-0.12.0-black?logo=zig)](https://ziglang.org/documentation/0.12.0/)
+[![ci](https://github.com/softprops/zig-graphql/actions/workflows/ci.yml/badge.svg)](https://github.com/softprops/zig-graphql/actions/workflows/ci.yml) ![License Info](https://img.shields.io/github/license/softprops/zig-graphql) ![Releases](https://img.shields.io/github/v/release/softprops/zig-graphql) [![Zig Support](https://img.shields.io/badge/zig-0.13.0-black?logo=zig)](https://ziglang.org/documentation/0.13.0/)
 
 ## examples
 
@@ -102,7 +102,7 @@ Create a `build.zig.zon` file to declare a dependency
 Starting in zig `0.12.0`, you can use
 
 ```sh
-zig fetch --save https://github.com/softprops/zig-graphql/archive/refs/tags/v0.2.1.tar.gz
+zig fetch --save https://github.com/softprops/zig-graphql/archive/refs/tags/v0.2.2.tar.gz
 ```
 
 to manually add it as follows
@@ -115,7 +115,7 @@ to manually add it as follows
         // 👇 declare dep properties
         .graphql = .{
             // 👇 uri to download
-            .url = "https://github.com/softprops/zig-graphql/archive/refs/tags/v0.2.1.tar.gz",
+            .url = "https://github.com/softprops/zig-graphql/archive/refs/tags/v0.2.2.tar.gz",
             // 👇 hash verification
             .hash = "{current-hash-here}",
         },
@@ -158,7 +158,7 @@ pub fn build(b: *std.Build) void {
 Does this look interesting but you're new to zig and feel left out? No problem, zig is young so most us of our new are as well. Here are some resources to help get you up to speed on zig
 
 - [the official zig website](https://ziglang.org/)
-- [zig's one-page language documentation](https://ziglang.org/documentation/0.11.0/)
+- [zig's one-page language documentation](https://ziglang.org/documentation/0.13.0/)
 - [ziglearn](https://ziglearn.org/)
 - [ziglings exercises](https://github.com/ratfactor/ziglings)
 
