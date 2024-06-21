@@ -159,7 +159,7 @@ Does this look interesting but you're new to zig and feel left out? No problem, 
 
 - [the official zig website](https://ziglang.org/)
 - [zig's one-page language documentation](https://ziglang.org/documentation/0.13.0/)
-- [ziglearn](https://ziglearn.org/)
-- [ziglings exercises](https://github.com/ratfactor/ziglings)
+- [Learning Zig](https://www.openmymind.net/learning_zig/)
+- [ziglings exercises](https://codeberg.org/ziglings/exercises/)
 
 \- softprops 2024
