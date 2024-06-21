@@ -39,7 +39,7 @@ pub const Error = struct {
 /// of one or the other but not both
 ///
 /// See the [GraphQL docs](https://graphql.org/learn/serving-over-http/#response) for more information
-fn Response(comptime T: type) type {
+pub fn Response(comptime T: type) type {
     return struct {
         errors: ?[]Error = null,
         data: ?T = null,
