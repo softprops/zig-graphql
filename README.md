@@ -21,7 +21,7 @@ pub fn main() !void {
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
 
-    const authz = if (std.os.getenv("GH_TOKEN")) |pat| blk: {
+    const authz = if (std.posix.getenv("GH_TOKEN")) |pat| blk: {
         var buf: [400]u8 = undefined;
         break :blk try std.fmt.bufPrint(
             &buf,
